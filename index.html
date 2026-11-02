@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>KPOP LIVE GAME</title>
+
+<style>
+
+.match-top{
+
+display:flex;
+
+justify-content:center;
+
+align-items:flex-start;
+
+gap:10px;
+
+margin-bottom:15px;
+
+}
+
+.history-panel{
+
+background:
+rgba(255,255,255,.08);
+
+border-radius:15px;
+
+padding:15px;
+
+color:white;
+
+overflow:hidden;
+
+}
+
+.history-panel h3{
+
+margin-top:0;
+
+color:#00f2ea;
+
+text-align:center;
+
+}
+
+#matchHistory{
+
+font-size:16px;
+
+line-height:1.7;
+
+}
+
+body{
+background:linear-gradient(135deg,#ff0050,#6c2cff,#111);
+font-family:Segoe UI;
+margin:0;
+color:white;
+}
+
+.container{
+width:1300px;
+max-width:95%;
+margin:auto;
+padding:20px;
+}
+
+.mode{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.mode button{
+padding:15px 30px;
+cursor:pointer;
+border:none;
+border-radius:15px;
+font-weight:bold;
+}
+
+.tab{
+display:none;
+}
+
+.active{
+display:block;
+}
+
+.card{
+background:rgba(255,255,255,.08);
+padding:20px;
+border-radius:25px;
+backdrop-filter:blur(20px);
+}
+
+input{
+width:100%;
+padding:15px;
+border-radius:15px;
+border:none;
+margin:10px 0;
+}
+
+.spinBtn{
+background:#00f2ea;
+padding:15px 40px;
+font-size:20px;
+border:none;
+border-radius:15px;
+cursor:pointer;
+}
+
+.photo{
+width:100%;
+max-width:400px;
+height:600px;
+margin:0;
+overflow:hidden;
+border-radius:20px;
+box-shadow:0 0 25px #ff0050;
+}
+
+.photo img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.spin-photo{
+
+width:400px;
+
+height:600px;
+
+margin-left:auto;
+
+margin-right:auto;
+
+margin-top:15px;
+
+overflow:hidden;
+
+border-radius:20px;
+
+box-shadow:
+0 0 30px rgba(255,0,80,.8);
+
+}
+
+.spin-photo img{
+
+width:100%;
+
+height:100%;
+
+object-fit:cover;
+
+display:block;
+
+}
+
+.result{
+font-size:22px;
+line-height:1.8;
+margin-top:20px;
+}
+
+#wheel{
+display:block;
+margin:auto;
+transition:transform 5s ease-out;
+
+width:150px;
+height:150px;
+
+object-fit:contain;
+}
+
+.zonk{
+animation:flash .2s infinite;
+}
+
+@keyframes flash{
+0%{background:red;}
+50%{background:black;}
+100%{background:red;}
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="mode">
+
+<button onclick="showTab('match')">
+💖 MATCH IDOL
+</button>
+
+<button onclick="showTab('spin')">
+🎡 SPIN IDOL
+</button>
+
+</div>
+
+<!-- MATCH -->
+
+<div id="match" class="tab active card">
+
+<h2>💖 Match Idol Korea</h2>
+
+<input
+id="namaMatch"
+placeholder="Masukkan Nama"
+onkeydown="if(event.key==='Enter'){idolMatch();}">
+<br><br>
+
+<select id="viewerGender">
+
+<option value="male">
+👨 Cowok
+</option>
+
+<option value="female">
+👩 Cewek
+</option>
+
+</select>
+
+<br><br>
+
+<button
+class="spinBtn"
+onclick="idolMatch()">
+
+MATCH
+</button>
+
+<div class="match-top">
+
+<div class="photo">
+
+<img
+id="matchPhoto"
+src="">
+
+</div>
+
+<div class="history-panel">
+
+<h3>
+📜 RIWAYAT MATCH
+</h3>
+
+<div id="matchHistory">
+
+Belum ada riwayat
+
+</div>
+
+</div>
+
+</div>
+
+<div
+class="result"
+id="matchResult">
+</div>
+
+</div>
+
+<!-- SPIN -->
+
+<div id="spin" class="tab card">
+
+<h2>🎡 Spin Idol Korea</h2>
+
+<input
+id="spinViewer"
+placeholder="Masukkan Nama Viewer"
+onkeydown="if(event.key==='Enter'){spinWheel();}">
+
+<br><br>
+
+<canvas
+id="wheel"
+width="600"
+height="600">
+</canvas>
+
+
+<button
+class="spinBtn"
+onclick="spinWheel()">
+
+SPIN SEKARANG
+</button>
+
+<div class="spin-photo">
+
+<img
+id="spinPhoto"
+src="">
+
+</div>
+
+<div
+class="result"
+id="spinResult">
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const idols = [
+{name:"ANA",photo:"KPOP_PHOTOS/ANA.jpg"},
+{name:"BAEKHYUN",photo:"KPOP_PHOTOS/BAEKHYUN.jpg"},
+{name:"CHAEYOUNG",photo:"KPOP_PHOTOS/CHAEYOUNG.jpeg"},
+{name:"CHANYEOL",photo:"KPOP_PHOTOS/CHANYEOL.jpeg"},
+{name:"CHEN",photo:"KPOP_PHOTOS/CHEN.jpg"},
+{name:"D.O",photo:"KPOP_PHOTOS/D.O.jpeg"},
+{name:"DAHYUN",photo:"KPOP_PHOTOS/DAHYUN.jpeg"},
+{name:"GAEUL",photo:"KPOP_PHOTOS/GAEUL.jpeg"},
+{name:"GISELLE",photo:"KPOP_PHOTOS/Giselle.jpg"},
+{name:"IAN",photo:"KPOP_PHOTOS/IAN.jpg"},
+{name:"IU",photo:"KPOP_PHOTOS/IU.jpg"},
+{name:"J-HOPE",photo:"KPOP_PHOTOS/j-hope.webp"},
+{name:"JANG",photo:"KPOP_PHOTOS/JANG.jpeg"},
+{name:"JENNIE",photo:"KPOP_PHOTOS/Jennie.jpg"},
+{name:"JEONGYEON",photo:"KPOP_PHOTOS/JEONGYEON.jpeg"},
+{name:"JIHYO",photo:"KPOP_PHOTOS/JIHYO.jpeg"},
+{name:"JIMIN",photo:"KPOP_PHOTOS/Jimin.webp"},
+{name:"JIN",photo:"KPOP_PHOTOS/Jin.webp"},
+{name:"JISOO",photo:"KPOP_PHOTOS/Jisoo.jpg"},
+{name:"JIWOO",photo:"KPOP_PHOTOS/JIWOOO.jpg"},
+{name:"JUNGKOOK",photo:"KPOP_PHOTOS/JungKook.webp"},
+{name:"JUUNN",photo:"KPOP_PHOTOS/JUUNN.jpg"},
+{name:"KAI",photo:"KPOP_PHOTOS/KAI.jpeg"},
+{name:"KARINA",photo:"KPOP_PHOTOS/Karina.jpg"},
+{name:"KRIS",photo:"KPOP_PHOTOS/KRIS.jpg"},
+{name:"LAY",photo:"KPOP_PHOTOS/LAY.jpeg"},
+{name:"LEESEO",photo:"KPOP_PHOTOS/Leeseo.jpeg"},
+{name:"LISA",photo:"KPOP_PHOTOS/Lisa.jpg"},
+{name:"LIZ",photo:"KPOP_PHOTOS/LIZ.jpeg"},
+{name:"LUHAN",photo:"KPOP_PHOTOS/LUHAN.jpg"},
+{name:"MINA",photo:"KPOP_PHOTOS/MINA.jpeg"},
+{name:"MOMO",photo:"KPOP_PHOTOS/MOMO.jpeg"},
+{name:"NAYEON",photo:"KPOP_PHOTOS/NAYEON.jpeg"},
+{name:"NINGNING",photo:"KPOP_PHOTOS/Ningning.jpg"},
+{name:"REI",photo:"KPOP_PHOTOS/REI.jpeg"},
+{name:"RM",photo:"KPOP_PHOTOS/RM.webp"},
+{name:"ROSÉ",photo:"KPOP_PHOTOS/Rose.jpg"},
+{name:"SANA",photo:"KPOP_PHOTOS/SANA.jpeg"},
+{name:"SEHUN",photo:"KPOP_PHOTOS/SEHUN.jpeg"},
+{name:"STELLA",photo:"KPOP_PHOTOS/Stella.jpg"},
+{name:"SUGA",photo:"KPOP_PHOTOS/Suga.webp"},
+{name:"SUHO",photo:"KPOP_PHOTOS/SUHO.jpeg"},
+{name:"TAO",photo:"KPOP_PHOTOS/TAO.png"},
+{name:"TZUYU",photo:"KPOP_PHOTOS/TZUYU.jpeg"},
+{name:"V",photo:"KPOP_PHOTOS/V.webp"},
+{name:"WINTER",photo:"KPOP_PHOTOS/Winter.jpg"},
+{name:"XIUMIN",photo:"KPOP_PHOTOS/XIUMIN.jpg"},
+{name:"YEON",photo:"KPOP_PHOTOS/YEON.jpg"},
+{name:"YUHARAM",photo:"KPOP_PHOTOS/Yuharam.jpg"},
+{name:"YUJIN",photo:"KPOP_PHOTOS/YUJIN.jpeg"}
+];
+const maleIdols = idols.filter(idol => [
+
+"JUNGKOOK",
+"V",
+"JIMIN",
+"JIN",
+"RM",
+"SUGA",
+"J-HOPE",
+"BAEKHYUN",
+"KAI",
+"CHANYEOL",
+"CHEN",
+"D.O",
+"SEHUN",
+"SUHO",
+"XIUMIN",
+"KRIS",
+"LAY",
+"LUHAN",
+"TAO"
+
+].includes(idol.name));
+
+const femaleIdols = idols.filter(idol => [
+
+"JENNIE",
+"JISOO",
+"LISA",
+"ROSÉ",
+"IU",
+"KARINA",
+"WINTER",
+"NAYEON",
+"SANA",
+"TZUYU",
+"MINA",
+"MOMO",
+"DAHYUN",
+"JIHYO",
+"JEONGYEON",
+"NINGNING",
+"REI",
+"LIZ",
+"GAEUL",
+"LEESEO",
+"YUJIN",
+"GISELLE",
+"CHAEYOUNG"
+
+].includes(idol.name));
+
+const zonks=[
+
+"☠️ ZONK",
+"🐔 AYAM GORENG",
+"🍌 PISANG KRISPI",
+"🦖 DINOSAUR",
+"👻 HANTU KOST"
+
+];
+
+const greenFlags=[
+
+"Memiliki karakte yang hangat dan perhatian. Biasanya selalu berusaha menjaga komunikasi yang sehat dan membuat pasangan merasa nyaman dalam hubungan.",
+
+"Termasuk pribadi yang setia dan menghargai komitmen. Ketika sudah serius terhadap seseorang, biasanya akan berusaha mempertahankan hubungan dengan baik.",
+
+"Memiliki kemampuan menjadi pendengar yang baik serta mampu memberikan dukungan emosional ketika pasangan sedang menghadapi masalah.",
+
+"Mudah membuat suasana menjadi menyenangkan dan jarang membuat hubungan terasa membosankan karena karakter yang positif.",
+
+"Tipe orang yang menghargai proses tumbuh bersama dan tidak mudah menyerah saat menghadapi tantangan dalam hubungan."
+];
+
+const redFlags=[
+
+"Kadang terlalu banyak memikirkan hal-al kecil sehingga mudah mengalami overthinking dalam hubungan.",
+
+"Memiliki ekspektasi yang cukup tinggi sehingga dapat merasa kecewa ketika kenyataan tidak sesuai harapan.",
+
+"Cenderung menyimpan perasaan sendiri terlebih dahulu sebelum akhirnya membicarakannya kepada pasangan.",
+
+"Ketika menghadapi tekanan atau masalah biasanya membutuhkan waktu sendiri sehingga terkadang terlihat menjauh.",
+
+"Terkadang terlalu perfeksionis sehingga dapat memberikan tekanan yang tidak disadari kepada pasangan."
+];
+
+const personalities=[
+
+"Golden Retriever Personality. Ceia, ramah, mudah bergaul dan mempunyai energi positif yang membuat orang lain merasa nyaman.",
+
+"Black Cat Personality. Terlihat tenang dan misterius namun sebenarnya sangat peduli terhadap orang-orang terdekat.",
+
+"Alpha Personality. Percaya diri, mandiri dan memiliki kemampuan mengambil keputusan dengan cepat.",
+
+"Cool Personality. Tidak mudah panik dan cenderung menghadapi masalah dengan sikap tenang serta logis.",
+
+"Sweet Personality. Hangat, penuh perhatian dan sering menunjukkan kasih sayang melalui tindakan kecil."
+];
+
+const descriptions=[
+
+"Tipe pasangan yang cocok untuk hubungan jangka panjang. Menghargai komunikasi, kepercayaan dan komitmen sebagai fondasi utama hubungan.",
+
+"Pribadi yang mampu memberikan keseimbangan antara perhatian, kemandirian dan dukungan emosional kepada pasangan.",
+
+"Orang yang menghargai kesetiaan serta proses bertumbuh bersama. Hubungan dengannya biasanya terasa stabil dan nyaman.",
+
+"Memiliki karakter yang menyenangkan sehingga mudah diajak berbicara, bekerja sama dan membangun hubungan yang sehat.",
+
+"Tipe pasangan yang mampu menjadi teman, sahabat dan pendukung terbaik dalam berbagai situasi kehidupan."
+];
+
+let historyMatch=[];
+
+function rand(arr){
+return arr[
+Math.floor(Math.random()*arr.length)
+];
+}
+
+function showTab(id){
+
+document
+.querySelectorAll('.tab')
+.forEach(x=>x.classList.remove('active'));
+
+document
+.getElementById(id)
+.classList.add('active');
+
+}
+
+function idolMatch(){
+
+let nama =
+document
+.getElementById('namaMatch')
+.value;
+
+let gender =
+
+document
+.getElementById('viewerGender')
+.value;
+
+let idol;
+
+if(gender==="male"){
+
+idol = rand(femaleIdols);
+
+}else{
+
+idol = rand(maleIdols);
+
+}
+
+let match =
+70 + Math.floor(Math.random()*31);
+historyMatch.unshift(
+`${nama} → ${idol.name} (${match}%)`
+);
+
+historyMatch =
+historyMatch.slice(0,5);
+
+document
+.getElementById('matchHistory')
+.innerHTML=
+
+historyMatch.join("<br>");
+
+document
+.getElementById('matchPhoto')
+.src=idol.photo;
+
+document
+.getElementById('matchResult')
+.innerHTML=`
+
+<h2 style="font-size:40px;color:#00f2ea">
+
+💖 ${idol.name}
+
+</h2>
+
+<hr>
+
+<p>
+👤 <b>${nama}</b>
+</p>
+
+<p>
+💖 Compatibility :
+<b>${match}%</b>
+</p>
+
+<p>
+✅ Kelebihan Utama
+<br><br>
+${rand(greenFlags)}
+</p>
+
+<p>
+⚠ Tantangan Hubungan
+<br><br>
+${rand(redFlags)}
+</p>
+
+<p>
+😎 Kepribadian
+<br><br>
+${rand(personalities)}
+</p>
+
+<p>
+📝 Profil Pasangan
+<br><br>
+${rand(descriptions)}
+</p>
+
+<hr>
+
+<h3>
+📜 RIWAYAT MATCH
+</h3>
+
+${historyMatch.join("<br>")}
+
+`;
+
+}
+
+const canvas=
+document.getElementById('wheel');
+
+const ctx=
+canvas.getContext('2d');
+
+const total=12;
+
+const arc=
+(2*Math.PI)/total;
+
+for(let i=0;i<total;i++){
+
+ctx.beginPath();
+
+ctx.moveTo(300,300);
+
+ctx.fillStyle=
+i%2
+?"#ff0050"
+:"#00f2ea";
+
+ctx.arc(
+300,
+300,
+280,
+arc*i,
+arc*(i+1)
+);
+
+ctx.fill();
+
+}
+
+let rot=0;
+
+function spinWheel(){
+
+let viewer =
+
+document
+.getElementById('spinViewer')
+.value
+
+|| "Viewer";
+
+document
+.getElementById('spinResult')
+.innerHTML=`
+
+<h1 style="font-size:90px">
+3
+</h1>
+
+`;
+
+setTimeout(()=>{
+
+document
+.getElementById('spinResult')
+.innerHTML=`
+
+<h1 style="font-size:90px">
+2
+</h1>
+
+`;
+
+},1000);
+
+setTimeout(()=>{
+
+document
+.getElementById('spinResult')
+.innerHTML=`
+
+<h1 style="font-size:90px">
+1
+</h1>
+
+`;
+
+},2000);
+
+setTimeout(()=>{
+
+// kode spin yang sekarang
+
+},3000);
+
+let zonkChance=
+Math.random();
+
+let result;
+
+if(zonkChance<0.05){
+
+result={
+name:rand(zonks),
+photo:"",
+zonk:true
+};
+
+document.body.classList.add('zonk');
+
+setTimeout(()=>{
+document.body.classList.remove('zonk');
+},3000);
+
+}else{
+
+result=rand(idols);
+
+result.zonk=false;
+
+}
+
+rot +=
+7200+
+Math.random()*1440;
+
+canvas.style.transform=
+`rotate(${rot}deg)`;
+
+setTimeout(()=>{
+
+if(result.photo){
+
+document
+.getElementById('spinPhoto')
+.src=result.photo;
+
+}
+
+let match =
+70 + Math.floor(Math.random()*31);
+
+let status;
+
+if(match >= 95){
+
+status="💍 SOULMATE";
+
+}
+else if(match >= 85){
+
+status="❤️ COCOK";
+
+}
+else{
+
+status="😊 TEMAN DEKAT";
+
+}
+
+let visual =
+90 + Math.floor(Math.random()*11);
+
+let popularity =
+90 + Math.floor(Math.random()*11);
+
+const rarities=[
+
+"⭐⭐⭐ COMMON",
+
+"⭐⭐⭐⭐ RARE",
+
+"⭐⭐⭐⭐⭐ EPIC",
+
+"👑 LEGENDARY"
+
+];
+
+let rarity =
+rand(rarities);
+
+if(result.zonk){
+
+document
+.getElementById('spinPhoto')
+.style.display='none';
+
+document
+.getElementById('spinResult')
+.innerHTML=`
+
+<div class="zonkBox">
+
+<div class="zonkEmoji">
+
+🚨🚨🚨
+
+</div>
+
+<div class="zonkTitle">
+
+☠️ ZONK ☠️
+
+</div>
+
+<div class="zonkPrize">
+
+${result.name}
+
+</div>
+
+<div class="zonkText">
+
+Kesempatanmu hari ini
+belum berpihak 😭
+
+Coba putar lagi
+untuk mendapatkan idol impianmu.
+
+</div>
+
+<div class="zonkEmoji">
+
+😂😂😂😂😂
+
+</div>
+
+</div>
+
+`;
+
+return;
+
+}
+
+document
+.getElementById('spinPhoto')
+.style.display='block';
+
+document
+.getElementById('spinResult')
+.innerHTML=`
+
+<div style="
+background:rgba(255,255,255,.1);
+padding:20px;
+border-radius:20px;
+animation:zoomIn .8s ease;
+">
+
+<h1 style="
+font-size:42px;
+color:#00f2ea;
+text-align:center">
+
+✨ CONGRATULATIONS ✨
+
+<p style="
+text-align:center;
+font-size:45px;
+margin-top:10px;
+">
+
+${viewer}
+
+</p>
+
+</h1>
+
+<h2 style="
+font-size:50px;
+text-align:center">
+
+${result.name}
+
+</h2>
+
+<hr>
+
+<div style="
+font-size:30px;
+text-align:center;
+color:gold;
+font-weight:bold;
+margin:15px;
+">
+
+${rarity}
+
+</div>
+
+🏆 Visual Score :
+<b>${visual}/100</b>
+
+
+⭐ Popularity :
+<b>${popularity}/100</b>
+
+
+💖 Compatibility :
+<b>${match}%</b>
+
+<br><br>
+
+${status}
+
+
+✅ Kelebihan Utama
+
+
+${rand(greenFlags)}
+
+
+⚠ Tantangan Hubungan
+
+
+${rand(redFlags)}
+
+
+😎 Kepribadian
+
+
+${rand(personalities)}
+
+
+📝 Profil Idol
+
+
+${rand(descriptions)}
+
+</div>
+
+`;
+
+},5000);
+
+}
+
+</script>
+
+</body>
+</html>
